@@ -27,7 +27,7 @@ class EmotionResult(BaseModel):
 class EmotionBatchResponse(BaseModel):
     results: List[EmotionResult]
 
-class YouTubeEmotionAnalyzer:
+class ytEmotionAnalyzer:
     def __init__(self):
         load_dotenv()
         api_key = os.getenv("OPENAI_API_KEY")
@@ -64,7 +64,7 @@ class YouTubeEmotionAnalyzer:
             
             try:
                 response = self.client.chat.completions.create(
-                    model="gpt-5",  # Updated to GPT-5
+                    model="gpt-4o-mini",  # Use gpt-4o-mini instead of gpt-5 for now
                     messages=[
                         {
                             "role": "system", 
@@ -76,20 +76,61 @@ class YouTubeEmotionAnalyzer:
                         "type": "json_schema",
                         "json_schema": {
                             "name": "emotion_analysis",
-                            "strict": True,  # This is the structured output feature
-                            "schema": EmotionBatchResponse.model_json_schema()
+                            "strict": True,
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "results": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "comment_index": {
+                                                    "type": "integer"
+                                                },
+                                                "primary_emotion": {
+                                                    "type": "string",
+                                                    "enum": ["anger", "disgust", "fear", "joy", "sadness", "surprise", "neutral"]
+                                                },
+                                                "confidence": {
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 1
+                                                },
+                                                "all_emotions": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "anger": {"type": "number", "minimum": 0, "maximum": 1},
+                                                        "disgust": {"type": "number", "minimum": 0, "maximum": 1},
+                                                        "fear": {"type": "number", "minimum": 0, "maximum": 1},
+                                                        "joy": {"type": "number", "minimum": 0, "maximum": 1},
+                                                        "sadness": {"type": "number", "minimum": 0, "maximum": 1},
+                                                        "surprise": {"type": "number", "minimum": 0, "maximum": 1},
+                                                        "neutral": {"type": "number", "minimum": 0, "maximum": 1}
+                                                    },
+                                                    "required": ["anger", "disgust", "fear", "joy", "sadness", "surprise", "neutral"],
+                                                    "additionalProperties": False
+                                                }
+                                            },
+                                            "required": ["comment_index", "primary_emotion", "confidence", "all_emotions"],
+                                            "additionalProperties": False
+                                        }
+                                    }
+                                },
+                                "required": ["results"],
+                                "additionalProperties": False
+                            }
                         }
                     },
-                    max_completion_tokens=3000,  # Updated parameter name for GPT-5
-                    verbosity="medium",  # New GPT-5 parameter
-                    reasoning_effort="medium"  # New GPT-5 parameter for better analysis
+                    temperature=0.1,
+                    max_tokens=3000  # Use max_tokens instead of max_completion_tokens for gpt-4o-mini
                 )
                 
                 # Parse response using structured output
                 response_text = response.choices[0].message.content.strip()
                 
                 try:
-                    # GPT-5 with structured output should return properly formatted JSON
+                    # GPT with structured output should return properly formatted JSON
                     batch_data = json.loads(response_text)
                     batch_results = batch_data.get("results", [])
                     
@@ -102,9 +143,9 @@ class YouTubeEmotionAnalyzer:
                             'all_emotions': result['all_emotions']
                         }
                         results.append(adjusted_result)
-                    
+
                     print(f"✓ Successfully processed batch {i//batch_size + 1} with {len(batch_results)} results")
-                    
+
                 except json.JSONDecodeError as je:
                     print(f"JSON decode error for batch {i//batch_size + 1}: {je}")
                     # Fallback for malformed JSON
@@ -118,7 +159,7 @@ class YouTubeEmotionAnalyzer:
                                 'sadness': 0, 'surprise': 0, 'neutral': 1.0
                             }
                         })
-                
+
             except Exception as e:
                 print(f"API error for batch {i//batch_size + 1}: {e}")
                 # Add default results for failed batch
@@ -133,11 +174,12 @@ class YouTubeEmotionAnalyzer:
                         }
                     })
             
-            # Rate limiting - GPT-5 has higher rate limits but still good to be safe
-            time.sleep(0.5)  # Reduced from 1 second
+            # Rate limiting
+            time.sleep(0.5)
             print(f"Processed batch {i//batch_size + 1}/{(len(comments)-1)//batch_size + 1}")
         
         return results
+
     
     def analyze_emotions_single(self, comment: str) -> Dict:
         """Analyze single comment with GPT-5 thinking mode for complex cases"""
@@ -335,11 +377,8 @@ class YouTubeEmotionAnalyzer:
 
 
 # Enhanced usage with GPT-5 features
-def main():
-    # Set your OpenAI API key
-    API_KEY = "your-openai-api-key"
-    
-    analyzer = YouTubeEmotionAnalyzer()
+def main():    
+    analyzer = ytEmotionAnalyzer()
     
     # Choose analysis type
     print("Choose analysis type:")
