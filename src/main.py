@@ -40,6 +40,9 @@ from emotionAnalyzer import ytEmotionAnalyzer
 #         generator.save_statistics(f"outputs/youtube_statistics_{idx}.txt")
 
 for idx in range(1, 13):
+    if idx != 12:
+        continue
+
     analyzer = ytEmotionAnalyzer()
 
     choice = "1"
@@ -50,5 +53,3 @@ for idx in range(1, 13):
         f"outputs/emotions/youtube_emotion_{idx}.csv",
         use_detailed_analysis=use_detailed
     )
-
-    break
