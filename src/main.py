@@ -9,16 +9,23 @@ from emotionAnalyzer import ytEmotionAnalyzer
 #         idx = row[0]
 #         url = row[4]
 
+#         if 'shorts' not in url:
+#             continue
+
 #         crawler = ytCrawler()
-#         output_file = f"outputs/youtube_comments_{idx}.csv"
+#         output_file = f"outputs/youtube_shorts_comments_{idx}.csv"
 
 #         if not output_file:
 #             output_file = None
 
 #         crawler.crawl_youtube_comments(url, output_file)
 
-# for idx in range(1, 13):
-#     generator = ytWclouder(f"outputs/youtube_comments_{idx}.csv")
+# for idx in range(11, 29):
+
+#     if idx == 12:
+#         continue
+
+#     generator = ytWclouder(f"outputs/youtube_shorts_comments_{idx}.csv")
 #     if generator.load_data():
 #         generator.process_comments()
 #         generator.print_statistics()
@@ -34,13 +41,14 @@ from emotionAnalyzer import ytEmotionAnalyzer
 #         generator.display_wordcloud(
 #             wordcloud,
 #             title=f"YouTube Comments Word Cloud {idx}",
-#             save_path=f"outputs/youtube_wordcloud_{idx}.png"
+#             save_path=f"outputs/youtube_shorts_wordcloud_{idx}.png"
 #         )
 
-#         generator.save_statistics(f"outputs/youtube_statistics_{idx}.txt")
+#         generator.save_statistics(f"outputs/youtube_shorts_statistics_{idx}.txt")
 
-for idx in range(1, 13):
-    if idx != 12:
+for idx in range(11, 29):
+    
+    if idx == 12:
         continue
 
     analyzer = ytEmotionAnalyzer()
@@ -49,7 +57,7 @@ for idx in range(1, 13):
     use_detailed = choice == "2"
 
     result_df = analyzer.analyze_csv(
-        f"outputs/comments/youtube_comments_{idx}.csv",
-        f"outputs/emotions/youtube_emotion_{idx}.csv",
+        f"outputs/shorts_comments/youtube_shorts_comments_{idx}.csv",
+        f"outputs/shorts_emotions/youtube_shorts_emotion_{idx}.csv",
         use_detailed_analysis=use_detailed
     )

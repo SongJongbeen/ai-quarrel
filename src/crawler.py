@@ -25,6 +25,8 @@ class ytCrawler:
                 return parsed_url.path.split('/')[2]
             elif parsed_url.path[:3] == '/v/':
                 return parsed_url.path.split('/')[2]
+            elif parsed_url.path[:8] == '/shorts/':
+                return parsed_url.path.split('/')[2]
 
         return None
 
