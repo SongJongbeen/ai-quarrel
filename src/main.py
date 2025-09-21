@@ -48,7 +48,7 @@ from emotionAnalyzer import ytEmotionAnalyzer
 
 for idx in range(11, 29):
     
-    if idx == 12:
+    if idx <= 21:
         continue
 
     analyzer = ytEmotionAnalyzer()
